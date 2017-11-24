@@ -1,0 +1,15 @@
+{
+  "name": "cam-discover",
+  "version": "1.0.0",
+  "description": "Discover IP cameras using the onvif api",
+  "main": "discover.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "node-onvif": "^0.1.0",
+    "websocket.io": "^0.2.1"
+  }
+}
