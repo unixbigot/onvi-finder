@@ -1,0 +1,95 @@
+#!/usr/bin/env node
+
+const onvif = require('node-onvif');
+
+var program = require('commander');
+
+program.version('1.0.00')
+
+program.command('list', {isDefault:true})
+        .description('List discovered cameras')
+	.action(doList)
+
+program.command('info <cam>')
+	.description('Fetch information about a particular camera')
+	.option("-s, --service [service]", "TCP service name or port number to use", '1018')
+	.option("-u, --user [user]", "Username for authentication", process.env.ONVIF_USER||'admin')
+	.option("-p, --password [password]", "password", process.env.ONVIF_PASS||'admin')
+	.action(doInfo)
+
+program.command('snap <cam>')
+	.description('Save a snapshot from a particular camera')
+	.option("-f, --filename [filename]", "Filename for output", 'snapshot.jpg')
+	.option("-s, --service [service]", "TCP service name or port number to use", '1018')
+	.option("-u, --user [user]", "Username for authentication", process.env.ONVIF_USER||'admin')
+	.option("-p, --password [password]", "password", process.env.ONVIF_PASS||'admin')
+	.action(doSnap)
+
+if (!process.argv.slice(2).length) {
+  program.help()
+}
+
+program.parse(process.argv)
+
+function doList() {
+    console.log('Listing discovered cameras (takes a few seconds).');
+
+    onvif.startProbe().then((device_info_list) => {
+	console.log(device_info_list.length + ' devices were found.');
+	// Show the device name and the URL of the end point.
+	device_info_list.forEach((info) => {
+            console.log('- ' + info.urn);
+            console.log('  - ' + info.name);
+            console.log('  - ' + info.xaddrs[0]);
+	});
+    
+	console.log(JSON.stringify(device_info_list, null, '  '));
+    }).catch((error) => {
+	console.error(error);
+    });
+}
+
+function doInfo(cam, options) {
+    console.log(`doInfo ${cam}`)
+    console.log(`   service=${options.service} user=${options.user} pass=${options.password}`)
+
+    let device = new onvif.OnvifDevice({
+          xaddr: `http://${cam}:${options.service}/onvif/device_service`,
+	  user : options.user,
+	  pass : options.pass
+    });
+
+    device.init().then((info) => {
+	// Show the detailed information of the device.
+	console.log("Device: "+JSON.stringify(info, null, '  '));
+
+	let profile = device.getCurrentProfile();
+	console.log("Profile: "+JSON.stringify(profile, null, '  '));
+    }).catch((error) => {
+	console.error(error);
+    });
+}
+
+function doSnap(cam, options) {
+
+    const fs = require('fs');
+
+    let device = new onvif.OnvifDevice({
+          xaddr: `http://${cam}:${options.service}/onvif/device_service`,
+	  user : options.user,
+	  pass : options.pass
+    });
+
+    // Initialize the OnvifDevice object
+    device.init().then(() => {
+	// Get the data of the snapshot
+	console.log('fetching the data of the snapshot...');
+	return device.fetchSnapshot();
+    }).then((res) => {
+	// Save the data to a file
+	fs.writeFileSync(options.filename, res.body, {encoding: 'binary'});
+	console.log('Done!');
+    }).catch((error) => {
+	console.error(error);
+    });
+}
