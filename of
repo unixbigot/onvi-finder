@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 
 const onvif = require('node-onvif');
+const default_pass = ''
+const default_user = 'admin'
+const default_port = '1018'
 
 var program = require('commander');
 
@@ -12,17 +15,17 @@ program.command('list', {isDefault:true})
 
 program.command('info <cam>')
 	.description('Fetch information about a particular camera')
-	.option("-s, --service [service]", "TCP service name or port number to use", '1018')
-	.option("-u, --user [user]", "Username for authentication", process.env.ONVIF_USER||'admin')
-	.option("-p, --password [password]", "password", process.env.ONVIF_PASS||'admin')
+	.option("-s, --service [service]", "TCP service name or port number to use", default_port)
+	.option("-u, --user [user]", "Username for authentication", process.env.ONVIF_USER||default_user)
+	.option("-p, --password [password]", "password", process.env.ONVIF_PASS||default_pass)
 	.action(doInfo)
 
 program.command('snap <cam>')
 	.description('Save a snapshot from a particular camera')
 	.option("-f, --filename [filename]", "Filename for output", 'snapshot.jpg')
-	.option("-s, --service [service]", "TCP service name or port number to use", '1018')
-	.option("-u, --user [user]", "Username for authentication", process.env.ONVIF_USER||'admin')
-	.option("-p, --password [password]", "password", process.env.ONVIF_PASS||'admin')
+	.option("-s, --service [service]", "TCP service name or port number to use", default_port)
+	.option("-u, --user [user]", "Username for authentication", process.env.ONVIF_USER||default_user)
+	.option("-p, --password [password]", "password", process.env.ONVIF_PASS||default_pass)
 	.action(doSnap)
 
 if (!process.argv.slice(2).length) {
