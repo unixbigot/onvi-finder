@@ -53,8 +53,8 @@ function doList() {
 }
 
 function doInfo(cam, options) {
-    console.log(`doInfo ${cam}`)
-    console.log(`   service=${options.service} user=${options.user} pass=${options.password}`)
+    //console.log(`doInfo ${cam}`)
+    //console.log(`   service=${options.service} user=${options.user} pass=${options.password}`)
 
     let device = new onvif.OnvifDevice({
           xaddr: `http://${cam}:${options.service}/onvif/device_service`,
@@ -64,10 +64,8 @@ function doInfo(cam, options) {
 
     device.init().then((info) => {
 	// Show the detailed information of the device.
-	console.log("Device: "+JSON.stringify(info, null, '  '));
-
-	let profile = device.getCurrentProfile();
-	console.log("Profile: "+JSON.stringify(profile, null, '  '));
+	let devinfo ={Info:info, Profile: device.getCurrentProfile()};
+	console.log(JSON.stringify(devinfo, null, '  '));
     }).catch((error) => {
 	console.error(error);
     });
