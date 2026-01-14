@@ -11,6 +11,7 @@ program.version('1.0.00')
 
 program.command('list', {isDefault:true})
         .description('List discovered cameras')
+	.option("-v, --verbose", "Show extra information")
 	.action(doList)
 
 program.command('info <cam>')
@@ -34,27 +35,30 @@ if (!process.argv.slice(2).length) {
 
 program.parse(process.argv)
 
-function doList() {
+function doList(options) {
     console.log('Listing discovered cameras (takes a few seconds).');
 
     onvif.startProbe().then((device_info_list) => {
-	console.log(device_info_list.length + ' devices were found.');
+	let msg = (device_info_list.length==1)?'device was found.':'devices were found.';
+	console.log(`${device_info_list.length} ${msg}`);
 	// Show the device name and the URL of the end point.
 	device_info_list.forEach((info) => {
             console.log('- ' + info.urn);
             console.log('  - ' + info.name);
             console.log('  - ' + info.xaddrs[0]);
 	});
-    
-	console.log(JSON.stringify(device_info_list, null, '  '));
+
+	if (options.verbose) {
+	    console.log(JSON.stringify(device_info_list, null, '  '));
+	}
     }).catch((error) => {
 	console.error(error);
     });
 }
 
 function doInfo(cam, options) {
-    //console.log(`doInfo ${cam}`)
-    //console.log(`   service=${options.service} user=${options.user} pass=${options.password}`)
+    console.log(`doInfo ${cam}`)
+    console.log(`   service=${options.service} user=${options.user} pass=${options.password}`)
 
     let device = new onvif.OnvifDevice({
           xaddr: `http://${cam}:${options.service}/onvif/device_service`,
